@@ -2,8 +2,27 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import StepsMetric from "./src/components/StepsMetric";
 import RingProgress from "./src/components/RingProgress";
+import { useEffect, useState } from "react";
+import appleHealthKit, { HealthKitPermissions } from "react-native-health";
+
+const permissions: HealthKitPermissions = {
+  permissions: {
+    read: [appleHealthKit.Constants.Permissions.Steps],
+    write: [],
+  },
+};
 
 export default function App() {
+  const [hasPermission, setHasPermission] = useState(false);
+  useEffect(() => {
+    appleHealthKit.initHealthKit(permissions, (error) => {
+      if (error) {
+        console.log("Error getting permisions");
+        return;
+      }
+      setHasPermission(true);
+    });
+  }, []);
   return (
     <View style={styles.container}>
       <RingProgress radius={150} strokeWidth={50} progress={0.5} />
