@@ -1,10 +1,13 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import StepsMetric from "./src/components/StepsMetric";
+import RingProgress from "./src/components/RingProgress";
 
 export default function App() {
   return (
     <View style={styles.container}>
+      <RingProgress progress={0} />
+
       <View style={styles.metricsContainer}>
         <StepsMetric label="Steps" value="1000" />
         <StepsMetric label="Distance" value="5km" />
@@ -27,5 +30,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 35,
     flexWrap: "wrap",
+    marginTop: 80,
   },
 });
