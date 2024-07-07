@@ -5,6 +5,10 @@ import appleHealthKit, {
   HealthKitPermissions,
   HealthValue,
 } from "react-native-health";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../../config/FirebaseConfig";
+import uuid from "react-native-uuid";
+import * as Location from "expo-location";
 
 const permissions: HealthKitPermissions = {
   permissions: {
@@ -22,6 +26,7 @@ const useHealthData = (date: Date) => {
   const [steps, setSteps] = useState(0);
   const [distance, setDistance] = useState(0);
   const [calories, setCalories] = useState(0);
+  const [userLocation, setUserLocation] = useState<Location.LocationObject>();
 
   useEffect(() => {
     appleHealthKit.initHealthKit(permissions, (error) => {
@@ -62,7 +67,7 @@ const useHealthData = (date: Date) => {
           if (error) {
             console.log("Error getting the stesps");
           }
-          console.log({ result });
+          console.log("result>>>>>", { result });
 
           setDistance(result.value / 1000);
         });
@@ -72,32 +77,60 @@ const useHealthData = (date: Date) => {
     new NativeEventEmitter(NativeModules.AppleHealthKit).addListener(
       "healthKit:ActiveEnergyBurned:new",
       async () => {
-        appleHealthKit.getBasalEnergyBurned(options, (error, value) => {
+        appleHealthKit.getBasalEnergyBurned(options, (error, result) => {
           if (error) {
             console.log("Error getting the stesps");
           }
-          console.log("caloeries", { value });
+          console.log("caloeries>>>>", { result });
 
-          // const totalCalories = value.reduce((accumulator, currentValue) => {
-          //   accumulator + currentValue;
-          // }, 0);
-          // let sum = 0;
+          let totalCalories = 0;
 
-          // // calculate sum using forEach() method
-          // value.forEach((num) => {
-          //   sum += num;
-          // });
+          result.forEach((value: HealthValue | number) => {
+            totalCalories += value as number;
+          });
 
-          // setCalories(totalCalories);
+          setCalories(totalCalories);
         });
       }
     );
   }, [hasPermission]);
 
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status == "granted") {
+        console.log("Permission granted successfully");
+      } else {
+        console.log("Permission denied");
+      }
+
+      const location = await Location.getCurrentPositionAsync();
+      setUserLocation(location);
+    })();
+  }, []);
+
+  const location = {
+    latitude: userLocation?.coords.latitude,
+    longitude: userLocation?.coords.longitude,
+  };
+
+  const saveHealthData = async () => {
+    await setDoc(doc(db, "Apple Health"), {
+      id: uuid.v4(),
+      steps,
+      distance,
+      calories,
+      location,
+    });
+  };
+
+  saveHealthData();
+
   return {
     steps,
     distance,
     calories,
+    location,
   };
 };
 

@@ -4,35 +4,18 @@ import StepsMetric from "./src/components/StepsMetric";
 import RingProgress from "./src/components/RingProgress";
 import { useEffect, useState } from "react";
 import useHealthData from "./src/hooks/useHealthData";
-import * as Location from "expo-location";
+import LocationMap from "./src/components/LocationMap";
 
 const STEP_GOAL = 10000;
 
 export default function App() {
-  const [userLocation, setUserLocation] = useState<
-    Location.LocationObject | undefined
-  >();
-  const { steps, calories, distance } = useHealthData(new Date("2024-07-02"));
-
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status == "granted") {
-        console.log("Permission granted successfully");
-      } else {
-        console.log("Permission denied");
-      }
-
-      const location = await Location.getCurrentPositionAsync();
-      setUserLocation(location);
-    })();
-  }, []);
+  const { steps, calories, distance, location } = useHealthData(
+    new Date("2024-07-02")
+  );
 
   return (
     <View style={styles.container}>
-      <Text style={{ marginTop: 20, marginBottom: 20, color: "white" }}>
-        {JSON.stringify(userLocation)}
-      </Text>
+      <LocationMap location={location} />
       <RingProgress
         radius={150}
         strokeWidth={50}
