@@ -1,8 +1,9 @@
-import { View, Text } from "react-native";
+import { View, Text, NativeEventEmitter, NativeModules } from "react-native";
 import React, { useEffect, useState } from "react";
 import appleHealthKit, {
   HealthInputOptions,
   HealthKitPermissions,
+  HealthValue,
 } from "react-native-health";
 
 const permissions: HealthKitPermissions = {
@@ -41,31 +42,56 @@ const useHealthData = (date: Date) => {
       includeManuallyAdded: false,
     };
 
-    appleHealthKit.getStepCount(options, (error, result) => {
-      if (error) {
-        console.log("Error getting the stesps");
+    new NativeEventEmitter(NativeModules.AppleHealthKit).addListener(
+      "healthKit:StepCount:new",
+      async () => {
+        appleHealthKit.getStepCount(options, (error, result) => {
+          if (error) {
+            console.log("Error getting the stesps");
+          }
+
+          setSteps(result.value);
+        });
       }
+    );
 
-      setSteps(result.value);
-    });
+    new NativeEventEmitter(NativeModules.AppleHealthKit).addListener(
+      "healthKit:Walking:new",
+      async () => {
+        appleHealthKit.getDistanceWalkingRunning(options, (error, result) => {
+          if (error) {
+            console.log("Error getting the stesps");
+          }
+          console.log({ result });
 
-    appleHealthKit.getDistanceWalkingRunning(options, (error, result) => {
-      if (error) {
-        console.log("Error getting the stesps");
+          setDistance(result.value / 1000);
+        });
       }
-      // console.log({ result });
+    );
 
-      setDistance(result.value / 1000);
-    });
+    new NativeEventEmitter(NativeModules.AppleHealthKit).addListener(
+      "healthKit:ActiveEnergyBurned:new",
+      async () => {
+        appleHealthKit.getBasalEnergyBurned(options, (error, value) => {
+          if (error) {
+            console.log("Error getting the stesps");
+          }
+          console.log("caloeries", { value });
 
-    appleHealthKit.getActiveEnergyBurned(options, (error, result) => {
-      if (error) {
-        console.log("Error getting the stesps");
+          // const totalCalories = value.reduce((accumulator, currentValue) => {
+          //   accumulator + currentValue;
+          // }, 0);
+          // let sum = 0;
+
+          // // calculate sum using forEach() method
+          // value.forEach((num) => {
+          //   sum += num;
+          // });
+
+          // setCalories(totalCalories);
+        });
       }
-      console.log("caloeries", { result });
-
-      // setCalories(result.value);
-    });
+    );
   }, [hasPermission]);
 
   return {
