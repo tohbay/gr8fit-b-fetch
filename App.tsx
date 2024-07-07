@@ -3,34 +3,33 @@ import { StyleSheet, Text, View } from "react-native";
 import StepsMetric from "./src/components/StepsMetric";
 import RingProgress from "./src/components/RingProgress";
 import { useEffect, useState } from "react";
-import appleHealthKit, { HealthKitPermissions } from "react-native-health";
+import appleHealthKit, {
+  HealthInputOptions,
+  HealthKitPermissions,
+  HealthUnit,
+} from "react-native-health";
+import useHealthData from "./src/hooks/useHealthData";
 
-const permissions: HealthKitPermissions = {
-  permissions: {
-    read: [appleHealthKit.Constants.Permissions.Steps],
-    write: [],
-  },
-};
+const STEP_GOAL = 10000;
 
 export default function App() {
-  const [hasPermission, setHasPermission] = useState(false);
-  useEffect(() => {
-    appleHealthKit.initHealthKit(permissions, (error) => {
-      if (error) {
-        console.log("Error getting permisions");
-        return;
-      }
-      setHasPermission(true);
-    });
-  }, []);
+  const { steps, flights, distance } = useHealthData(new Date("2024-07-03"));
+
   return (
     <View style={styles.container}>
-      <RingProgress radius={150} strokeWidth={50} progress={0.5} />
+      <RingProgress
+        radius={150}
+        strokeWidth={50}
+        progress={steps / STEP_GOAL}
+      />
 
       <View style={styles.metricsContainer}>
-        <StepsMetric label="Steps" value="1000" />
-        <StepsMetric label="Distance" value="5km" />
-        <StepsMetric label="Flights climbed" value="0.65km" />
+        <StepsMetric label="Steps" value={steps.toString()} />
+        <StepsMetric
+          label="Distance"
+          value={`${distance.toFixed(2).toString()} km`}
+        />
+        <StepsMetric label="Flights climbed" value={flights.toString()} />
       </View>
 
       <StatusBar style="auto" />
