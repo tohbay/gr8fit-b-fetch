@@ -30,8 +30,8 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ marginTop: 20, marginBottom: 20 }}>
-        {JSON.stringify(location)}
+      <Text style={{ marginTop: 20, marginBottom: 20, color: "white" }}>
+        {JSON.stringify(userLocation)}
       </Text>
       <RingProgress
         radius={150}
