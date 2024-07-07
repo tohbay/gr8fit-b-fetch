@@ -12,7 +12,7 @@ export default function App() {
   const [userLocation, setUserLocation] = useState<
     Location.LocationObject | undefined
   >();
-  const { steps, flights, distance } = useHealthData(new Date("2024-07-03"));
+  const { steps, calories, distance } = useHealthData(new Date("2024-07-02"));
 
   useEffect(() => {
     (async () => {
@@ -45,7 +45,7 @@ export default function App() {
           label="Distance"
           value={`${distance.toFixed(2).toString()} km`}
         />
-        <StepsMetric label="Flights climbed" value={flights.toString()} />
+        <StepsMetric label="Calories" value={calories.toString()} />
       </View>
 
       <StatusBar style="auto" />
