@@ -27,6 +27,11 @@
     },
     "plugins": [
       "react-native-health"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f3b43a52-aaf0-428d-b996-a19d4bd46de8"
+      }
+    }
   }
 }
